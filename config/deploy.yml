@@ -51,27 +51,23 @@ env:
     - SERVERPOD_PASSWORD_database
     - SERVERPOD_PASSWORD_redis
   clear:
-    SERVERPOD_PASSWORD_serviceSecret: iVMcUDM067xS0TtuOsxea5h2arpHjPs1C-av-7ypuvk31O8cuW64nLA5obQwG5eX
-    SERVERPOD_PASSWORD_emailSecretHashPepper: GMnwYO-aSkJCJvHqY2OJxBO1oSUOHc1Il6Ye4LYI51XdjlrwChE33rPRPBFiAIZq
-    SERVERPOD_PASSWORD_jwtHmacSha512PrivateKey: D4b3VVNY5n7jM2aOlcNS8hbjb2wcux56PHN69_lgRw5q1B4fbLi0dORaHK6iqAFE
-    SERVERPOD_PASSWORD_jwtRefreshTokenHashPepper: WC5GW-mXHAaQ2xhUH3bHCKmlzDxs27XovLHYGInOwZosLfD2uzuF2IOsJTfeASiT
     PORT: 8080
     SERVERPOD_RUN_MODE: production
-    SERVERPOD_DATABASE_HOST: postgres
+    SERVERPOD_DATABASE_HOST: serverpoddemo-postgres
     SERVERPOD_DATABASE_PORT: 5432
     SERVERPOD_DATABASE_NAME: serverpoddemo
     SERVERPOD_DATABASE_USER: postgres
     SERVERPOD_REDIS_ENABLED: true
-    SERVERPOD_REDIS_HOST: redis
+    SERVERPOD_REDIS_HOST: serverpoddemo-redis
     SERVERPOD_REDIS_PORT: 6379
     DATABASE_TYPE: postgresql
-    DATABASE_HOST: postgres
+    DATABASE_HOST: serverpoddemo-postgres
     DATABASE_PORT: 5432
     DATABASE_NAME: serverpoddemo
     DATABASE_USER: postgres
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: serverpoddemo-postgres
     POSTGRES_PORT: 5432
-    REDIS_HOST: redis
+    REDIS_HOST: serverpoddemo-redis
     REDIS_PORT: 6379
     REDIS_DB: 0
 
@@ -82,21 +78,18 @@ aliases:
   logs: app logs
 
 
-# Build on the project's own VPS: Alkimist orchestrates, your server builds.
-# With registry.server localhost:5555, Kamal runs a transfer registry on the
-# deploy container and SSH-forwards port 5555 to the VPS for push and pull.
+# Serverpod AOT compilation is memory intensive. Build in the account
+# runtime instead of starving a small production VPS.
 builder:
   arch: amd64
-  local: false
-  remote: ssh://root@5.78.46.167
+  local: true
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
   postgres:
     image: pgvector/pgvector:pg16
-    service: postgres
+    service: serverpoddemo-postgres
     host: 5.78.46.167
-    port: "127.0.0.1:5432:5432"
     env:
       secret:
         - POSTGRES_USER
@@ -107,9 +100,8 @@ accessories:
 
   redis:
     image: redis:6.2.6
-    service: redis
+    service: serverpoddemo-redis
     host: 5.78.46.167
-    port: "127.0.0.1:6379:6379"
     cmd: 'redis-server --requirepass "$REDIS_PASSWORD"'
     env:
       clear:
