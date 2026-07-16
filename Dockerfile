@@ -1,33 +1,14 @@
-FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+FROM dart:3.5.0 AS build
+WORKDIR /app
 
-ENTRYPOINT ["/bin/bash", "-l", "-c"]
-WORKDIR /app/
+COPY pubspec.* ./
+RUN dart pub get
+COPY . .
+RUN dart compile exe bin/server.dart -o /app/server
 
-
-COPY .nixpacks/nixpkgs-5148520bfab61f99fd25fb9ff7bfbb50dad3c9db.nix .nixpacks/nixpkgs-5148520bfab61f99fd25fb9ff7bfbb50dad3c9db.nix
-RUN nix-env -if .nixpacks/nixpkgs-5148520bfab61f99fd25fb9ff7bfbb50dad3c9db.nix && nix-collect-garbage -d
-
-
-ARG NIXPACKS_METADATA="dart"
-ENV NIXPACKS_METADATA=$NIXPACKS_METADATA
-
-# setup phase
-# noop
-
-# install phase
-COPY pubspec.yaml /app/pubspec.yaml
-RUN  dart pub get
-
-# build phase
-COPY . /app/.
-RUN  dart compile exe bin/serverpoddemo.dart
-
-
-
-
-
-# start
-COPY . /app
-
-CMD ["./bin/serverpoddemo.exe"]
-
+FROM debian:bookworm-slim
+RUN apt-get update     && apt-get install -y --no-install-recommends ca-certificates     && rm -rf /var/lib/apt/lists/*
+COPY --from=build /app/server /app/server
+ENV PORT=8080
+EXPOSE 8080
+CMD ["/app/server"]
