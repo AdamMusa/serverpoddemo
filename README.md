@@ -1,2 +1,1 @@
-# serverpoddemo
-Serverpod deployment demo for Alkimist
+# Serverpod demo\n\nMinimal Serverpod dependency project used to verify Alkimist Dart, PostgreSQL, Redis, proxy, TLS, and health-check deployment infrastructure.\n
