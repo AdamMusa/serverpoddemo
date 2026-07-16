@@ -6,3 +6,4 @@
 .git
 .kamal
 config/deploy.yml
+**/config/passwords.yaml
