@@ -16,9 +16,8 @@ servers:
       - 5.78.46.167
     cmd: "--mode=production --server-id=api --logging=normal --role=monolith"
     proxy:
+      host: api.serverpod.alkimist.dev
       app_port: 8080
-      path_prefix: /api
-      strip_path_prefix: true
       healthcheck:
         path: /
 
