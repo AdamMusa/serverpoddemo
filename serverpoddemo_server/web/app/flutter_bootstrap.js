@@ -35,8 +35,15 @@ if (!window._flutter) {
 }
 _flutter.buildConfig = {"engineRevision":"6c0baaebf70e0148f485f27d5616b3d3382da7bf","builds":[{"compileTarget":"dart2wasm","renderer":"skwasm","mainWasmPath":"main.dart.wasm","jsSupportRuntimePath":"main.dart.mjs"},{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}]};
 
-_flutter.loader.load({
-  serviceWorkerSettings: {
-    serviceWorkerVersion: "330093293" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */
+
+// Flutter's compiled entrypoints use stable filenames. Add the generated
+// build version to their URLs so a deployment cannot execute an older client
+// bundle that was cached by the browser or an edge proxy.
+const cacheVersion = "2689623006" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
+for (const build of _flutter.buildConfig.builds) {
+  for (const key of ['mainWasmPath', 'jsSupportRuntimePath', 'mainJsPath']) {
+    if (build[key]) build[key] = `${build[key]}?v=${cacheVersion}`;
   }
-});
+}
+
+_flutter.loader.load();

@@ -58,6 +58,10 @@ void run(List<String> args) async {
         Directory(
           Uri(path: 'web/app').toFilePath(),
         ),
+        // Flutter's generated entrypoints keep stable filenames. Serving all
+        // app assets with no-cache prevents an older compiled API URL from
+        // surviving a deployment in browser caches.
+        cacheControlFactory: StaticRoute.privateNoCache(),
       ),
       '/app',
     );
