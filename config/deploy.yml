@@ -1,0 +1,123 @@
+# Name of your application. Used to uniquely configure containers.
+service: serverpoddemo
+
+# Name of the container image.
+image: adammusa/serverpoddemo
+
+# Serverpod exposes its generated Flutter web app and API from two
+# ports. Kamal deploys identical generated server containers and gives
+# each role an independent proxy route on the same public domain.
+servers:
+  web:
+    hosts:
+      - 5.78.46.167
+  api:
+    hosts:
+      - 5.78.46.167
+    cmd: "--mode=production --server-id=api --logging=normal --role=monolith"
+    proxy:
+      app_port: 8080
+      path_prefix: /api
+      strip_path_prefix: true
+      healthcheck:
+        path: /
+
+# Branded error pages served by kamal-proxy (503 shows the maintenance message).
+error_pages_path: .alkimist/error_pages
+
+# SSH from the user's account container. Deploys must be non-interactive.
+ssh:
+  user: root
+  keys_only: true
+  keys:
+    - /home/deployer/.ssh/id_rsa
+  config: /home/deployer/.ssh/config
+
+proxy:
+  ssl: true
+  hosts:
+    - serverpod.alkimist.dev
+  app_port: 8082
+  healthcheck:
+    path: /
+
+
+# Credentials for your image host.
+registry:
+  server: localhost:10046
+
+env:
+  secret:
+    - SERVERPOD_PASSWORD_serviceSecret
+    - SERVERPOD_PASSWORD_emailSecretHashPepper
+    - SERVERPOD_PASSWORD_jwtHmacSha512PrivateKey
+    - SERVERPOD_PASSWORD_jwtRefreshTokenHashPepper
+    - DATABASE_URL
+    - DATABASE_PASSWORD
+    - POSTGRES_USER
+    - POSTGRES_DB
+    - POSTGRES_PASSWORD
+    - REDIS_PASSWORD
+    - REDIS_URL
+    - SERVERPOD_PASSWORD_database
+    - SERVERPOD_PASSWORD_redis
+  clear:
+    PORT: 8080
+    SERVERPOD_RUN_MODE: production
+    SERVERPOD_DATABASE_HOST: serverpoddemo-postgres
+    SERVERPOD_DATABASE_PORT: 5432
+    SERVERPOD_DATABASE_NAME: serverpoddemo
+    SERVERPOD_DATABASE_USER: postgres
+    SERVERPOD_REDIS_ENABLED: true
+    SERVERPOD_REDIS_HOST: serverpoddemo-redis
+    SERVERPOD_REDIS_PORT: 6379
+    DATABASE_TYPE: postgresql
+    DATABASE_HOST: serverpoddemo-postgres
+    DATABASE_PORT: 5432
+    DATABASE_NAME: serverpoddemo
+    DATABASE_USER: postgres
+    POSTGRES_HOST: serverpoddemo-postgres
+    POSTGRES_PORT: 5432
+    REDIS_HOST: serverpoddemo-redis
+    REDIS_PORT: 6379
+    REDIS_DB: 0
+
+
+# Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
+aliases:
+  shell: app exec --interactive --reuse "sh"
+  logs: app logs
+
+
+# Serverpod AOT compilation is memory intensive. Build in the account
+# runtime instead of starving a small production VPS.
+builder:
+  arch: amd64
+  local: true
+
+# Use accessory services (secrets come from .kamal/secrets).
+accessories:
+  postgres:
+    image: pgvector/pgvector:pg16
+    service: serverpoddemo-postgres
+    host: 5.78.46.167
+    env:
+      secret:
+        - POSTGRES_USER
+        - POSTGRES_DB
+        - POSTGRES_PASSWORD
+    directories:
+      - serverpoddemo_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.6
+    service: serverpoddemo-redis
+    host: 5.78.46.167
+    cmd: 'sh -lc ''exec redis-server --requirepass "$REDIS_PASSWORD"'''
+    env:
+      clear:
+        REDIS_REPLICATION_MODE: master
+      secret:
+        - REDIS_PASSWORD
+    directories:
+      - serverpoddemo_redis_data:/data
