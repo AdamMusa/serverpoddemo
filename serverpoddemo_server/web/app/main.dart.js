@@ -24964,7 +24964,7 @@ break A}q=new A.mg("Unknown error, data: "+a,c)
 break A}return q},
 aq0(){var s=0,r=A.G(t.N),q
 var $async$aq0=A.H(function(a,b){if(a===1)return A.D(b,r)
-for(;;)switch(s){case 0:q="https://api.serverpod.alkimist.dev/"
+for(;;)switch(s){case 0:q="https://serverpod-api.alkimist.dev/"
 s=1
 break
 case 1:return A.E(q,r)}})
