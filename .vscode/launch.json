@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "serverpoddemo_flutter",
+            "cwd": "${workspaceFolder}/serverpoddemo_flutter",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "serverpoddemo_server",
+            "cwd": "${workspaceFolder}/serverpoddemo_server",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "docker_compose_up",
+            "program": "bin/main.dart",
+            "env": {
+                "SERVERPOD_PASSWORD_database": "fOpFcrctFYW69RjUBeisDslg0zCBKvaf"
+            },
+            "args": [
+                "--apply-migrations"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "serverpoddemo (full stack)",
+            "configurations": [
+                "serverpoddemo_server",
+                "serverpoddemo_flutter"
+            ],
+            "presentation": {
+                "order": 1
+            }
+        }
+    ]
+}

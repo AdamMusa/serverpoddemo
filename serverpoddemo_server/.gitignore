@@ -1,0 +1,18 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+
+# Conventional directory for build outputs
+build/
+
+# The production Flutter web build is committed so the generated Serverpod
+# web route can serve the client from /app in every deployment environment.
+
+# Directory created by dartdoc
+doc/api/
+
+# Passwords file
+config/passwords.yaml
+
+# Firebase service account key for Firebase auth
+config/firebase_service_account_key.json

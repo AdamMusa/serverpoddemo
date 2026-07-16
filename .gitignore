@@ -2,17 +2,9 @@
 .dart_tool/
 .packages
 
-# Conventional directory for build outputs
-build/
-
-# Ignore the flutter web app directory
-web/app
-
-# Directory created by dartdoc
-doc/api/
-
-# Passwords file
+# Alkimist deployment secrets and generated deployment files.
+.kamal/
 config/passwords.yaml
 
-# Firebase service account key for Firebase auth
-config/firebase_service_account_key.json
+# Pubspec overrides
+pubspec_overrides.yaml

@@ -1,0 +1,8 @@
+.dart_tool
+**/.dart_tool
+**/build
+**/.idea
+**/*.iml
+.git
+.kamal
+config/deploy.yml
