@@ -6,7 +6,7 @@ image: adammusa/serverpoddemo
 
 # Serverpod exposes its generated Flutter web app and API from two
 # ports. Kamal deploys identical generated server containers and gives
-# each role an independent proxy route on the same public domain.
+# each role an independent proxy hostname.
 servers:
   web:
     hosts:
@@ -17,7 +17,7 @@ servers:
     cmd: "--mode=production --server-id=api --logging=normal --role=monolith"
     proxy:
       hosts:
-        - api.serverpod.alkimist.dev
+        - serverpod-api.alkimist.dev
       app_port: 8080
       healthcheck:
         path: /
