@@ -1,57 +1,20 @@
-# Build from the project root with:
-# docker build -f serverpoddemo_server/Dockerfile .
-
-# Build stage
 FROM dart:3.8.0 AS build
-
-# Create a minimal workspace that preserves locked server dependency versions.
 WORKDIR /app
-COPY pubspec.lock .
-COPY serverpoddemo_server serverpoddemo_server
-RUN printf '%s\n' \
-  'name: _' \
-  'environment:' \
-  '  sdk: ^3.8.0' \
-  'workspace:' \
-  '  - serverpoddemo_server' \
-  > pubspec.yaml
+
+COPY pubspec.* ./
 RUN dart pub get
+COPY . .
+RUN dart compile exe bin/main.dart -o /app/server
+RUN mkdir -p config web migrations lib/src/generated
 
-# Compile the server executable.
-WORKDIR /app/serverpoddemo_server
-RUN dart compile exe bin/main.dart -o bin/server
-
-# Add a fallback for the copy of possibly missing directories.
-RUN mkdir -p config web migrations
-
-# Final stage
 FROM alpine:latest
 WORKDIR /app
-
-# Environment variables
-ENV runmode=production
-ENV serverid=default
-ENV logging=normal
-ENV role=monolith
-
-# Copy runtime dependencies
 COPY --from=build /runtime/ /
-
-# Copy compiled server executable
-COPY --from=build /app/serverpoddemo_server/bin/server server
-
-# Copy configuration files and resources
-COPY --from=build /app/serverpoddemo_server/config/ config/
-COPY --from=build /app/serverpoddemo_server/web/ web/
-COPY --from=build /app/serverpoddemo_server/migrations/ migrations/
-
-# This file is required to enable the endpoint log filter in Insights.
-COPY --from=build /app/serverpoddemo_server/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
-
-# Expose ports
-EXPOSE 8080
-EXPOSE 8081
-EXPOSE 8082
-
-# Define the entrypoint command
-ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
+COPY --from=build /app/server /app/server
+COPY --from=build /app/config/ config/
+COPY --from=build /app/web/ web/
+COPY --from=build /app/migrations/ migrations/
+COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
+EXPOSE 8080 8081 8082
+ENTRYPOINT ["/app/server"]
+CMD ["--mode=production", "--server-id=default", "--logging=normal", "--role=monolith", "--apply-migrations"]
