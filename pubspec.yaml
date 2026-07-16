@@ -1,0 +1,1 @@
+name: serverpoddemo\ndescription: Serverpod deployment smoke test for Alkimist\nversion: 1.0.0\nenvironment:\n  sdk: ">=3.5.0 <4.0.0"\ndependencies:\n  serverpod: ^2.9.1\n
