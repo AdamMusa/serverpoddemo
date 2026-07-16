@@ -4,7 +4,7 @@ COPY . .
 RUN sed -i '/_flutter$/d' /workspace/pubspec.yaml
 WORKDIR /workspace/serverpoddemo_server
 RUN dart pub get
-RUN dart compile exe bin/main.dart -o /app/server
+RUN mkdir -p /app && dart compile exe bin/main.dart -o /app/server
 RUN mkdir -p config web migrations lib/src/generated
 
 FROM alpine:latest
