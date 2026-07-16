@@ -14,8 +14,8 @@ The production Flutter client is built with:
 
 ```sh
 flutter build web --release --base-href /app/ --wasm \
-  --dart-define=SERVER_URL=https://serverpod.alkimist.dev/api/
+  --dart-define=SERVER_URL=https://api.serverpod.alkimist.dev/
 ```
 
-Serverpod serves that build at `/app`; Alkimist routes `/api/*` to the
-generated Serverpod API server and strips the `/api` prefix.
+Serverpod serves that build at `/app`; Alkimist routes the generated API role
+through `api.serverpod.alkimist.dev`.

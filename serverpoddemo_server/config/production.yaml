@@ -7,7 +7,7 @@
 # Configuration for the main API server.
 apiServer:
   port: 8080
-  publicHost: serverpod.alkimist.dev
+  publicHost: api.serverpod.alkimist.dev
   publicPort: 443
   publicScheme: https
 
