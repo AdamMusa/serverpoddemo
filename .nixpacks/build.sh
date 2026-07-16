@@ -1,0 +1,1 @@
+docker build . -f ./.nixpacks/Dockerfile -t 9c78c72a-534a-4c05-a7c0-cecab238fe14 --build-arg NIXPACKS_METADATA=dart
