@@ -1,14 +1,57 @@
-FROM dart:3.5.0 AS build
+# Build from the project root with:
+# docker build -f serverpoddemo_server/Dockerfile .
+
+# Build stage
+FROM dart:3.8.0 AS build
+
+# Create a minimal workspace that preserves locked server dependency versions.
+WORKDIR /app
+COPY pubspec.lock .
+COPY serverpoddemo_server serverpoddemo_server
+RUN printf '%s\n' \
+  'name: _' \
+  'environment:' \
+  '  sdk: ^3.8.0' \
+  'workspace:' \
+  '  - serverpoddemo_server' \
+  > pubspec.yaml
+RUN dart pub get
+
+# Compile the server executable.
+WORKDIR /app/serverpoddemo_server
+RUN dart compile exe bin/main.dart -o bin/server
+
+# Add a fallback for the copy of possibly missing directories.
+RUN mkdir -p config web migrations
+
+# Final stage
+FROM alpine:latest
 WORKDIR /app
 
-COPY pubspec.* ./
-RUN dart pub get
-COPY . .
-RUN dart compile exe bin/server.dart -o /app/server
+# Environment variables
+ENV runmode=production
+ENV serverid=default
+ENV logging=normal
+ENV role=monolith
 
-FROM debian:bookworm-slim
-RUN apt-get update     && apt-get install -y --no-install-recommends ca-certificates     && rm -rf /var/lib/apt/lists/*
-COPY --from=build /app/server /app/server
-ENV PORT=8080
+# Copy runtime dependencies
+COPY --from=build /runtime/ /
+
+# Copy compiled server executable
+COPY --from=build /app/serverpoddemo_server/bin/server server
+
+# Copy configuration files and resources
+COPY --from=build /app/serverpoddemo_server/config/ config/
+COPY --from=build /app/serverpoddemo_server/web/ web/
+COPY --from=build /app/serverpoddemo_server/migrations/ migrations/
+
+# This file is required to enable the endpoint log filter in Insights.
+COPY --from=build /app/serverpoddemo_server/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
+
+# Expose ports
 EXPOSE 8080
-CMD ["/app/server"]
+EXPOSE 8081
+EXPOSE 8082
+
+# Define the entrypoint command
+ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
